@@ -22,17 +22,9 @@ public:
 	GzBool set(GzInt x, GzInt y, const GzColor& c);
 
 	void clear(const GzColor& c);
-
-	//// Additional implementation for depth buffer -----------------------------
-	//GzBool setZDepth(GzInt x, GzInt y, const GzReal z, const GzColor& c);
-	//GzReal getZDepth(GzInt x, GzInt y);
-	//void clearZBuffer(const GzReal z);
 private:
 	vector<vector<GzColor> > pixel;
 	GzInt w, h;
-
-	//// Additional implementation for depth buffer -----------------------------
-	//vector<vector<GzReal>> depthBuffer;
 };
 //----------------------------------------------------------------------------
 

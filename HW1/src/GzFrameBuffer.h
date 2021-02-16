@@ -20,9 +20,9 @@ public:
 	void drawPoint(const GzVertex& v, const GzColor& c, GzFunctional status);
 
 	// Additional implementation for depth buffer -----------------------------
-	GzBool setZDepth(GzInt x, GzInt y, const GzReal z, const GzColor& c);
-	GzReal getZDepth(GzInt x, GzInt y);
-	void clearZBuffer(const GzReal z);
+	//GzBool setZDepth(GzInt x, GzInt y, const GzReal z, const GzColor& c);
+	//GzReal getZDepth(GzInt x, GzInt y);
+	//void clearZBuffer(const GzReal z);
 
 private:
 	//Put any variables and private functions for your implementation here
@@ -32,9 +32,11 @@ private:
 	GzColor presetColor;
 	GzReal presetDepth;
 
-
+	//GzColor* colorBuffer;
+	//GzReal* depthBuffer;
 	// Additional implementation for depth buffer -----------------------------
 	vector<vector<GzReal>> depthBuffer;
+	vector<vector<GzColor>> colorBuffer;
 };
 //----------------------------------------------------------------------------
 
