@@ -9,11 +9,8 @@ void GzFrameBuffer::initFrameSize(GzInt width, GzInt height) {
 	presetColor = GzColor(0, 0, 0); 
 	presetDepth = 0;
 
-	//colorBuffer = new GzColor[w * h];
-	//depthBuffer = new GzReal[w * h];
 	colorBuffer.resize(w);
 	depthBuffer.resize(w);
-	//image.resize(w, h);
 }
 
 //Convert the current rendering result to image
@@ -29,22 +26,10 @@ GzImage GzFrameBuffer::toImage() {
 
 //Clear buffers to preset values
 void GzFrameBuffer::clear(GzFunctional buffer) {
-	if (buffer & GZ_COLOR_BUFFER) {
-		//image.clear(presetColor);
-		/*for (int i = 0; i < h; i++) {
-			for (int j = 0; j < w; j++) {
-				colorBuffer[j][i] = presetColor;
-			}
-		}*/
+	if (buffer & GZ_COLOR_BUFFER) { //clear color buffer
 		fill(colorBuffer.begin(), colorBuffer.end(), vector<GzColor>(h, presetColor));
 	}
-	if (buffer & GZ_DEPTH_BUFFER) {
-		//clearZBuffer(presetDepth);
-		/*for (int i = 0; i < w; i++) {
-			for (int j = 0; j < h; j++) {
-				depthBuffer[i][j] = presetDepth;
-			}
-		}*/
+	if (buffer & GZ_DEPTH_BUFFER) { //clear depth buffer
 		fill(depthBuffer.begin(), depthBuffer.end(), vector<GzReal>(h, presetDepth));
 	}
 }
@@ -60,38 +45,18 @@ void GzFrameBuffer::setClearDepth(GzReal depth) {
 }
 
 void GzFrameBuffer::drawPoint(const GzVertex& v, const GzColor& c, GzFunctional status) {
-	if ((v[X] < 0) || (v[Y] < 0) || (v[X] >= w) || (v[Y] >= h)) //Check boundaries 
+
+	int y = -v[Y]+h -1; //update y-coordinate to get origin (0,0) in the bottom left
+	if ((v[X] < 0) || (y < 0) || (v[X] >= w) || (y >= h)) //Check boundaries 
 		return;
 
-	if (status & GZ_DEPTH_TEST) {
-		//setZDepth(v[X], v[Y], v[Z], c);
-		if (v[Z] > depthBuffer[v[X]][v[Y]]) {
-			depthBuffer[v[X]][v[Y]] = v[Z];
-			colorBuffer[v[X]][v[Y]] = c;
+	if (status & GZ_DEPTH_TEST) { 
+		if (v[Z] > depthBuffer[v[X]][y]) { //depth test passes
+			depthBuffer[v[X]][y] = v[Z]; //update depth buffer with new depth value
+			colorBuffer[v[X]][y] = c; //update color buffer for rendering
 		}
 	}
 	else {
-		//image.set(v[X], v[Y], c);
-		colorBuffer[v[X]][v[Y]] = c;
+		colorBuffer[v[X]][y] = c;
 	}
 }
-
-// Additional implementation for depth buffer -----------------------------
-//GzBool GzFrameBuffer::setZDepth(GzInt x, GzInt y, const GzReal z, const GzColor& c) {
-//	if ((x < 0) || (y < 0) || (x >= w) || (y >= h)) return false;
-//
-//	if (z >= depthBuffer[x][y]) {
-//		depthBuffer[x][y] = z;
-//		image.set(x, y, c);
-//		return true;
-//	}
-//}
-//
-//GzReal GzFrameBuffer::getZDepth(GzInt x, GzInt y) {
-//	if ((x < 0) || (y < 0) || (x >= w) || (y >= h)) return GzReal();
-//	return depthBuffer[x][y];
-//}
-//
-//void GzFrameBuffer::clearZBuffer(const GzReal z) {
-//	fill(depthBuffer.begin(), depthBuffer.end(), vector<GzReal>(h, z));
-//}
