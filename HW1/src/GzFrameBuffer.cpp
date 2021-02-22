@@ -45,18 +45,16 @@ void GzFrameBuffer::setClearDepth(GzReal depth) {
 }
 
 void GzFrameBuffer::drawPoint(const GzVertex& v, const GzColor& c, GzFunctional status) {
-
-	int y = -v[Y]+h -1; //update y-coordinate to get origin (0,0) in the bottom left
-	if ((v[X] < 0) || (y < 0) || (v[X] >= w) || (y >= h)) //Check boundaries 
+	if ((v[X] < 0) || (v[Y] < 0) || (v[X] >= w) || (v[Y] >= h)) //Check boundaries 
 		return;
 
 	if (status & GZ_DEPTH_TEST) { 
-		if (v[Z] > depthBuffer[v[X]][y]) { //depth test passes
-			depthBuffer[v[X]][y] = v[Z]; //update depth buffer with new depth value
-			colorBuffer[v[X]][y] = c; //update color buffer for rendering
+		if (v[Z] > depthBuffer[v[X]][v[Y]]) { //depth test passes
+			depthBuffer[v[X]][v[Y]] = v[Z]; //update depth buffer with new depth value
+			colorBuffer[v[X]][v[Y]] = c; //update color buffer for rendering
 		}
 	}
 	else {
-		colorBuffer[v[X]][y] = c;
+		colorBuffer[v[X]][v[Y]] = c;
 	}
 }
