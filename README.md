@@ -13,4 +13,5 @@ Microsoft Visual Studio 2019 C++
 2. After cloning or extracting the zip file, you should find a project file HW1.sln in HW1/src folder.
 3. Open HW1.sln (solution file) in Visual Studio.
 4. Build the solution. Once build completed, you should see HW1.exe executable file in the same directory as the solution file.
-5. Finally, run the executable file HW1.exe.
+5. Finally, run the executable file HW1.exe. 
+6. Once it's completed, it will produce 2 output image (NoDepthBuf.bmp and WithDepthBuf.bmp) in the same folder.
