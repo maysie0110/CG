@@ -76,9 +76,9 @@ void GzFrameBuffer::drawTriangle(GzVertex* vTriangle, GzColor* cTriangle, GzFunc
 	sortY(vTriangle, cTriangle);
 
 	// Create 3 edges of triangle
-	Edge edge1(vTriangle[0], vTriangle[1], cTriangle[0], cTriangle[1]);
-	Edge edge2(vTriangle[1], vTriangle[2], cTriangle[1], cTriangle[2]);
-	Edge edge3(vTriangle[0], vTriangle[2], cTriangle[0], cTriangle[2]);
+	Edge edge01(vTriangle[0], vTriangle[1], cTriangle[0], cTriangle[1]);
+	Edge edge12(vTriangle[1], vTriangle[2], cTriangle[1], cTriangle[2]);
+	Edge edge02(vTriangle[0], vTriangle[2], cTriangle[0], cTriangle[2]);
 
 	/*
 	* Interpolate quantity along left and eight edges, as a function on y
@@ -93,20 +93,22 @@ void GzFrameBuffer::drawTriangle(GzVertex* vTriangle, GzColor* cTriangle, GzFunc
 
 		left[Y] = scanline;
 		right[Y] = scanline;
+
+		/*Determine the left endpoint and right endpoint that intersects the scanline*/
 		if (scanline <= vTriangle[1][Y])
 		{
-			left[X] = Interpolate(edge1.start[Y], edge1.end[Y], edge1.start[X], edge1.end[X], scanline);
-			left[Z] = Interpolate(edge1.start[Y], edge1.end[Y], edge1.start[Z], edge1.end[Z], scanline);
-			leftColor = colorInterpolate(edge1.start[Y], edge1.end[Y], edge1.cstart, edge1.cend, scanline);
+			left[X] = Interpolate(edge01.start[Y], edge01.end[Y], edge01.start[X], edge01.end[X], scanline);
+			left[Z] = Interpolate(edge01.start[Y], edge01.end[Y], edge01.start[Z], edge01.end[Z], scanline);
+			leftColor = colorInterpolate(edge01.start[Y], edge01.end[Y], edge01.cstart, edge01.cend, scanline);
 		} else {
-			left[X] = Interpolate(edge2.start[Y], edge2.end[Y], edge2.start[X], edge2.end[X], scanline);
-			left[Z] = Interpolate(edge2.start[Y], edge2.end[Y], edge2.start[Z], edge2.end[Z], scanline);
-			leftColor = colorInterpolate(edge2.start[Y], edge2.end[Y], edge2.cstart, edge2.cend, scanline);
+			left[X] = Interpolate(edge12.start[Y], edge12.end[Y], edge12.start[X], edge12.end[X], scanline);
+			left[Z] = Interpolate(edge12.start[Y], edge12.end[Y], edge12.start[Z], edge12.end[Z], scanline);
+			leftColor = colorInterpolate(edge12.start[Y], edge12.end[Y], edge12.cstart, edge12.cend, scanline);
 		}
 
-		right[X] = Interpolate(edge3.start[Y], edge3.end[Y], edge3.start[X], edge3.end[X], scanline);
-		right[Z] = Interpolate(edge3.start[Y], edge3.end[Y], edge3.start[Z], edge3.end[Z], scanline);
-		rightColor = colorInterpolate(edge3.start[Y], edge3.end[Y], edge3.cstart, edge3.cend, scanline);
+		right[X] = Interpolate(edge02.start[Y], edge02.end[Y], edge02.start[X], edge02.end[X], scanline);
+		right[Z] = Interpolate(edge02.start[Y], edge02.end[Y], edge02.start[Z], edge02.end[Z], scanline);
+		rightColor = colorInterpolate(edge02.start[Y], edge02.end[Y], edge02.cstart, edge02.cend, scanline);
 
 
 		if (left[X] > right[X]) /*Swap coordinate & color of left and right points*/
@@ -137,15 +139,15 @@ double GzFrameBuffer::Interpolate(double x0, double x1, double y0, double y1, do
 }
 
 //linear color interpolation
-GzColor GzFrameBuffer::colorInterpolate(double startX, double endX, GzColor cstart, GzColor cend, double x)
+GzColor GzFrameBuffer::colorInterpolate(double x0, double x1, GzColor cstart, GzColor cend, double x)
 {
-	double dX = endX - startX;
+	double dX = x1 - x0;
 
 	GzColor color(0, 0, 0);
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++) /*3 values for R,G,B*/
 	{
 		if (dX != 0)
-			color[i] = cstart[i] + (x - startX) * ((cend[i] - cstart[i]) / dX);
+			color[i] = cstart[i] + (x - x0) * ((cend[i] - cstart[i]) / dX);
 		else
 			color[i] = cstart[i];
 	}
