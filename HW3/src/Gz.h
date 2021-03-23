@@ -82,8 +82,6 @@ private:
 	void normalizeVector(GzReal* v);
 	void crossProduct(GzReal* result, GzReal* v1, GzReal* v2);
 	void affineTransform(GzVertex& v);
-
-	void copyArrayToMatrix(GzReal a[], GzMatrix& m, int nRow, int nCol);
 //============================================================================
 //End of Declarations in Assignment #3
 //============================================================================
