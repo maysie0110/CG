@@ -136,6 +136,7 @@ void Gz::lookAt(GzReal eyeX, GzReal eyeY, GzReal eyeZ, GzReal centerX, GzReal ce
 	//Or google: gluLookAt
 	// 
 	// ---------------------------------------- 
+	// The following code is based on gluLookAt source code. References below:
 	// https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
 	// https://computergraphics.stackexchange.com/questions/4668/correcting-my-look-at-matrix-so-that-it-works-on-non-camera-objects
 	// https://www.khronos.org/opengl/wiki/GluLookAt_code
@@ -359,8 +360,6 @@ void Gz::orthographic(GzReal left, GzReal right, GzReal bottom, GzReal top, GzRe
 	//Set up a orthographic projection matrix
 	//See http://www.opengl.org/sdk/docs/man/xhtml/glOrtho.xml
 	//Or google: glOrtho
-
-	prjMatrix = Identity(4);
 
 	GzReal tx = -(right + left) / (right - left);
 	GzReal ty = -(top + bottom) / (top - bottom);
