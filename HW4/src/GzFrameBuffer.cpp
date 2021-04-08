@@ -157,7 +157,6 @@ void GzFrameBuffer::addLight(const GzVector& v, const GzColor& c) {
 
 //apply transformation to light sources
 void GzFrameBuffer::loadLightTrans(GzMatrix transMatrix) {
-	_transMatrix = transMatrix;
 	for (int k = 0; k < lightSources.size(); k++)
 	{
 		GzMatrix M;
@@ -181,6 +180,10 @@ void GzFrameBuffer::loadLightTrans(GzMatrix transMatrix) {
 	}
 }
 
+//Get eye position
+void GzFrameBuffer::loadEyePos(GzVector eye) {
+	E = eye;
+}
 // draw point when there are shader
 // similar to the original function with a small changes to color by applying material property (ie. shading with diffuse, ambient, specular)
 
@@ -232,7 +235,7 @@ GzColor GzFrameBuffer::shader(const GzColor& c, const GzVector& n) {
 
 		//Specular
 		// Vector to eye.
-		GzVector eye = GzVector(-_transMatrix[0][3], -_transMatrix[1][3], -_transMatrix[2][3]);
+		GzVector eye = E;
 		eye.normalize();
 
 		//Viewer direction

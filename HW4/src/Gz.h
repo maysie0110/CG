@@ -100,6 +100,7 @@ public:
 
 private:
 	queue<GzVector> normalQueue;			//Store normal vectors in queue for rendering
+	GzVector eye; //Store eye position for viewer
 //============================================================================
 //End of Declarations in Assignment #4
 //============================================================================

@@ -80,7 +80,7 @@ public:
 	void drawPoint(const GzVertex& v, const GzColor& c, const GzVector& n, GzFunctional status);
 	void drawTriangle(vector<GzVertex>& v, vector<GzColor>& c, vector<GzVector>& n, GzFunctional status);
 	void drawRasLine(GzInt y, GzReal xMin, GzReal zMin, GzColor& cMin, GzVector& nMin, GzReal xMax, GzReal zMax, GzColor& cMax, GzVector& nMax, GzFunctional status);
-
+	void loadEyePos(GzVector eye);
 private:
 	GzInt curShadeModel;
 	GzReal kA, kD, kS, s;
@@ -89,10 +89,11 @@ private:
 	vector<GzLightSource> lightSources;
 	vector<GzLightSource> transLightSources;
 
-	GzMatrix _transMatrix;
+	//GzMatrix _transMatrix;
 	GzColor shader(const GzColor& c, const GzVector& n);
 	GzReal clamp(GzReal x, GzReal min, GzReal max);
 	void vectorInterpolate(GzReal key1, GzVector& val1, GzReal key2, GzVector& val2, GzReal key, GzVector& val);
+	GzVector E; //store eye position to compute viewer direction
 //============================================================================
 //End of Declarations in Assignment #4
 //============================================================================

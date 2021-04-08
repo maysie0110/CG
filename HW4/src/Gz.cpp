@@ -109,6 +109,9 @@ void Gz::lookAt(GzReal eyeX, GzReal eyeY, GzReal eyeZ, GzReal centerX, GzReal ce
 
 
 	translate(-eyeX, -eyeY, -eyeZ);
+
+	eye = GzVector(eyeX, eyeY, eyeZ);
+	frameBuffer.loadEyePos(eye);
 }
 
 void Gz::multMatrix(GzMatrix mat) {
