@@ -93,6 +93,6 @@ int main() {
 	gz.translate(0, -1, 0);
 
 	draw("PhongTeaPot2.bmp");
-	//	
+		
 	return 0;
 }

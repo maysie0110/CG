@@ -4,7 +4,7 @@
 #include <climits>
 void GzFrameBuffer::initFrameSize(GzInt width, GzInt height) {
 	image.resize(width, height);
-	depthBuffer=vector<vector<GzReal> >(width, vector<GzReal>(height, clearDepth));
+	depthBuffer = vector<vector<GzReal> >(width, vector<GzReal>(height, clearDepth));
 }
 
 GzImage GzFrameBuffer::toImage() {
@@ -12,32 +12,33 @@ GzImage GzFrameBuffer::toImage() {
 }
 
 void GzFrameBuffer::clear(GzFunctional buffer) {
-	if (buffer&GZ_COLOR_BUFFER) image.clear(clearColor);
-	if (buffer&GZ_DEPTH_BUFFER)
-		for (GzInt x=0; x!=depthBuffer.size(); x++) 
+	if (buffer & GZ_COLOR_BUFFER) image.clear(clearColor);
+	if (buffer & GZ_DEPTH_BUFFER)
+		for (GzInt x = 0; x != depthBuffer.size(); x++)
 			fill(depthBuffer[x].begin(), depthBuffer[x].end(), clearDepth);
 }
 
 void GzFrameBuffer::setClearColor(const GzColor& color) {
-	clearColor=color;
+	clearColor = color;
 }
 
 void GzFrameBuffer::setClearDepth(GzReal depth) {
-	clearDepth=depth;
+	clearDepth = depth;
 }
 
 void GzFrameBuffer::drawPoint(const GzVertex& v, const GzColor& c, GzFunctional status) {
-	GzInt x=(GzInt)v[X];
-	GzInt y=image.sizeH()-(GzInt)v[Y]-1;
-	if ((x<0)||(y<0)||(x>=image.sizeW())||(y>=image.sizeH())) return;
-	if (status&GZ_DEPTH_TEST) {
-		if (v[Z]>=depthBuffer[x][y]) {
+	GzInt x = (GzInt)v[X];
+	GzInt y = image.sizeH() - (GzInt)v[Y] - 1;
+	if ((x < 0) || (y < 0) || (x >= image.sizeW()) || (y >= image.sizeH())) return;
+	if (status & GZ_DEPTH_TEST) {
+		if (v[Z] >= depthBuffer[x][y]) {
 			image.set(x, y, c);
-			depthBuffer[x][y]=v[Z];
+			depthBuffer[x][y] = v[Z];
 		}
-	} else {
+	}
+	else {
 		image.set(x, y, c);
-		depthBuffer[x][y]=v[Z];
+		depthBuffer[x][y] = v[Z];
 	}
 }
 
@@ -49,97 +50,99 @@ void GzFrameBuffer::drawTriangle(vector<GzVertex>& v, vector<GzColor>& c, GzFunc
 	v.push_back(v[0]);
 	c.push_back(c[0]);
 
-	yMin=INT_MAX;
-	yMax=-INT_MAX;
+	yMin = INT_MAX;
+	yMax = -INT_MAX;
 
-	for (GzInt i=0; i<3; i++) {
-		yMin=min((GzInt)floor(v[i][Y]), yMin);
-		yMax=max((GzInt)floor(v[i][Y]-1e-3), yMax);
+	for (GzInt i = 0; i < 3; i++) {
+		yMin = min((GzInt)floor(v[i][Y]), yMin);
+		yMax = max((GzInt)floor(v[i][Y] - 1e-3), yMax);
 	}
-		
-	for (GzInt y=yMin; y<=yMax; y++) {
-		xMin=INT_MAX;
-		xMax=-INT_MAX;
-		for (GzInt i=0; i<3; i++) {
-			if ((GzInt)floor(v[i][Y])==y) {
-				if (v[i][X]<xMin) {
-					xMin=v[i][X];
-					zMin=v[i][Z];
-					cMin=c[i];
+
+	for (GzInt y = yMin; y <= yMax; y++) {
+		xMin = INT_MAX;
+		xMax = -INT_MAX;
+		for (GzInt i = 0; i < 3; i++) {
+			if ((GzInt)floor(v[i][Y]) == y) {
+				if (v[i][X] < xMin) {
+					xMin = v[i][X];
+					zMin = v[i][Z];
+					cMin = c[i];
 				}
-				if (v[i][X]>xMax) {
-					xMax=v[i][X];
-					zMax=v[i][Z];
-					cMax=c[i];
+				if (v[i][X] > xMax) {
+					xMax = v[i][X];
+					zMax = v[i][Z];
+					cMax = c[i];
 				}
 			}
-			if ((y-v[i][Y])*(y-v[i+1][Y])<0) {
+			if ((y - v[i][Y]) * (y - v[i + 1][Y]) < 0) {
 				GzReal x;
-				realInterpolate(v[i][Y], v[i][X], v[i+1][Y], v[i+1][X], y, x);
-				if (x<xMin) {
-					xMin=x;
-					realInterpolate(v[i][Y], v[i][Z], v[i+1][Y], v[i+1][Z], y, zMin);
-					colorInterpolate(v[i][Y], c[i], v[i+1][Y], c[i+1], y, cMin);
+				realInterpolate(v[i][Y], v[i][X], v[i + 1][Y], v[i + 1][X], y, x);
+				if (x < xMin) {
+					xMin = x;
+					realInterpolate(v[i][Y], v[i][Z], v[i + 1][Y], v[i + 1][Z], y, zMin);
+					colorInterpolate(v[i][Y], c[i], v[i + 1][Y], c[i + 1], y, cMin);
 				}
-				if (x>xMax) {
-					xMax=x;
-					realInterpolate(v[i][Y], v[i][Z], v[i+1][Y], v[i+1][Z], y, zMax);
-					colorInterpolate(v[i][Y], c[i], v[i+1][Y], c[i+1], y, cMax);
+				if (x > xMax) {
+					xMax = x;
+					realInterpolate(v[i][Y], v[i][Z], v[i + 1][Y], v[i + 1][Z], y, zMax);
+					colorInterpolate(v[i][Y], c[i], v[i + 1][Y], c[i + 1], y, cMax);
 				}
 			}
 		}
-		drawRasLine(y, xMin, zMin, cMin, xMax-1e-3, zMax, cMax, status);
+		drawRasLine(y, xMin, zMin, cMin, xMax - 1e-3, zMax, cMax, status);
 	}
 }
 
 void GzFrameBuffer::drawRasLine(GzInt y, GzReal xMin, GzReal zMin, GzColor& cMin, GzReal xMax, GzReal zMax, GzColor& cMax, GzFunctional status) {
-	if ((y<0)||(y>=image.sizeH())) return;
-	if ((GzInt)floor(xMin)==(GzInt)floor(xMax)) {
-		if (zMin>zMax) drawPoint(GzVertex(floor(xMin), y, zMin), cMin, status);
-			else drawPoint(GzVertex(floor(xMin), y, zMax), cMax, status);
-	} else {
+	if ((y < 0) || (y >= image.sizeH())) return;
+	if ((GzInt)floor(xMin) == (GzInt)floor(xMax)) {
+		if (zMin > zMax) drawPoint(GzVertex(floor(xMin), y, zMin), cMin, status);
+		else drawPoint(GzVertex(floor(xMin), y, zMax), cMax, status);
+	}
+	else {
 		GzReal z;
 		GzColor c;
-		y=image.sizeH()-y-1;
-		int w=image.sizeW();
-		if (status&GZ_DEPTH_TEST) {
-			for (int x=max(0, (GzInt)floor(xMin)); x<=min(w-1, (GzInt)floor(xMax)); x++) {
+		y = image.sizeH() - y - 1;
+		int w = image.sizeW();
+		if (status & GZ_DEPTH_TEST) {
+			for (int x = max(0, (GzInt)floor(xMin)); x <= min(w - 1, (GzInt)floor(xMax)); x++) {
 				realInterpolate(xMin, zMin, xMax, zMax, x, z);
-				if (z>=depthBuffer[x][y]) {
+				if (z >= depthBuffer[x][y]) {
 					colorInterpolate(xMin, cMin, xMax, cMax, x, c);
 					image.set(x, y, c);
-					depthBuffer[x][y]=z;
+					depthBuffer[x][y] = z;
 				}
 			}
-		} else {
-			for (int x=max(0, (GzInt)floor(xMin)); x<=min(w-1, (GzInt)floor(xMax)); x++) {
+		}
+		else {
+			for (int x = max(0, (GzInt)floor(xMin)); x <= min(w - 1, (GzInt)floor(xMax)); x++) {
 				realInterpolate(xMin, zMin, xMax, zMax, x, z);
 				colorInterpolate(xMin, cMin, xMax, cMax, x, c);
 				image.set(x, y, c);
-				depthBuffer[x][y]=z;
+				depthBuffer[x][y] = z;
 			}
 		}
 	}
 }
 
 void GzFrameBuffer::realInterpolate(GzReal key1, GzReal val1, GzReal key2, GzReal val2, GzReal key, GzReal& val) {
-	val=val1+(val2-val1)*(key-key1)/(key2-key1);
+	val = val1 + (val2 - val1) * (key - key1) / (key2 - key1);
 }
 
 void GzFrameBuffer::colorInterpolate(GzReal key1, GzColor& val1, GzReal key2, GzColor& val2, GzReal key, GzColor& val) {
-	GzReal k=(key-key1)/(key2-key1);
-	for (GzInt i=0; i<4; i++) val[i]=val1[i]+(val2[i]-val1[i])*k;
+	GzReal k = (key - key1) / (key2 - key1);
+	for (GzInt i = 0; i < 4; i++) val[i] = val1[i] + (val2[i] - val1[i]) * k;
 }
 
 void GzFrameBuffer::shadeModel(const GzInt model) {
-	curShadeModel=model;
+	curShadeModel = model;
 }
 
 void GzFrameBuffer::material(GzReal _kA, GzReal _kD, GzReal _kS, GzReal _s) {
-	kA=_kA;
-	kD=_kD;
-	kS=_kS;
-	s=_s;
+	kA = _kA;
+	kD = _kD;
+	kS = _kS;
+	s = _s;
 }
 
 void GzFrameBuffer::addLight(const GzVector& v, const GzColor& c) {
@@ -152,7 +155,7 @@ void GzFrameBuffer::addLight(const GzVector& v, const GzColor& c) {
 * Additional implementation for Assignment 4
 */
 
-// load transformation matrix into framebuffer
+//apply transformation to light sources
 void GzFrameBuffer::loadLightTrans(GzMatrix transMatrix) {
 	_transMatrix = transMatrix;
 	for (int k = 0; k < lightSources.size(); k++)
@@ -166,7 +169,7 @@ void GzFrameBuffer::loadLightTrans(GzMatrix transMatrix) {
 
 		M = M.inverse3x3().transpose();
 
-		
+
 		GzVector d = lightSources[k].dir;
 
 		GzVector transLightDir;
@@ -179,14 +182,14 @@ void GzFrameBuffer::loadLightTrans(GzMatrix transMatrix) {
 }
 
 // draw point when there are shader
-// similar to the original function with a small changes to color by applying material property (ie. shading with diffuse, ambiant, specular)
+// similar to the original function with a small changes to color by applying material property (ie. shading with diffuse, ambient, specular)
 
 void GzFrameBuffer::drawPoint(const GzVertex& v, const GzColor& c, const GzVector& n, GzFunctional status) {
 	GzInt x = (GzInt)v[X];
 	GzInt y = image.sizeH() - (GzInt)v[Y] - 1;
 	if ((x < 0) || (y < 0) || (x >= image.sizeW()) || (y >= image.sizeH())) return;
 
-	GzColor color = shader(c, n);
+	GzColor color = shader(c, n); //get new color
 
 	if (status & GZ_DEPTH_TEST) {
 		if (v[Z] >= depthBuffer[x][y]) {
@@ -217,48 +220,45 @@ GzColor GzFrameBuffer::shader(const GzColor& c, const GzVector& n) {
 
 	// Diffuse lighting - point light source
 	for (int i = 0; i < transLightSources.size();i++) {
-		
+
 		// Point light intensity.In this case, it's color of the light
 		GzColor lightColor = transLightSources[i].col;
 
-		// Diffuse
 		// Light source at infinity
-		// Light direction from the light to the vertex (for all light sources)
+		// Light direction
 		GzVector pos;
 		GzVector L = pos - transLightSources[i].dir;
 		L.normalize(); //normalize direction vector
 
 		//Specular
-		// Eye at infinity
 		// Vector to eye.
-		// Eye is always at (0,0,0) looking down -z axis
-		GzVector eye = GzVector(0, 0, 1);
+		GzVector eye = GzVector(-_transMatrix[0][3], -_transMatrix[1][3], -_transMatrix[2][3]);
 		eye.normalize();
 
+		//Viewer direction
 		GzVector view = L + eye;
 		view.normalize();
 
-		/*GzVector view = GzVector(_transMatrix[0][3], _transMatrix[1][3], _transMatrix[2][3]);
-		view.normalize();*/
-		
-		//GzReal lightIntensity = dotProduct(n, L);
+		// Calculate the reflection direction for an incident vector
+		GzReal lightIntensity = dotProduct(L,n);
+		lightIntensity = clamp(lightIntensity, 0.0, 1.0);
 		GzVector reflection = 2 * n - L;
-		
+
 		reflection.normalize();
 
 		for (int j = 0; j < 4; j++) {
 
 			// Diffuse light
-			GzReal I_diff = kD * lightColor[j] * max(dotProduct(n, L),0.0);
+			GzReal I_diff = kD * lightColor[j] * max(dotProduct(n, L), 0.0);
 			// Because dot product can have a range of -1 to 1, so we clamp it to a range of 0 to 1
 			I_diff = clamp(I_diff, 0.0, 1.0);
 			color[j] += I_diff;
 
 			// Specular light
-			GzReal I_spec = lightColor[j] * kS * pow(max(dotProduct(reflection,view),0.0),s);
+			GzReal I_spec = lightColor[j] * kS * pow(max(dotProduct(reflection, view), 0.0), s);
 			I_spec = clamp(I_spec, 0.0, 1.0);
 			color[j] += I_spec;
-			
+
 		}
 	}
 	return color;
@@ -266,11 +266,10 @@ GzColor GzFrameBuffer::shader(const GzColor& c, const GzVector& n) {
 
 GzReal GzFrameBuffer::clamp(GzReal val, GzReal min, GzReal max)
 {
-	if (val > max)
-		val = max;
-	else if (val < min)
+	if (val < min)
 		val = min;
-
+	else if (val > max)
+		val = max;
 	return val;
 }
 
@@ -345,7 +344,7 @@ void GzFrameBuffer::drawTriangle(vector<GzVertex>& v, vector<GzColor>& c, vector
 	}
 }
 
-// Similar to colorInterpolate with minor changes
+// Similar to colorInterpolate with the addition of normal vector interpolation and the use of shader function
 void GzFrameBuffer::vectorInterpolate(GzReal key1, GzVector& val1, GzReal key2, GzVector& val2, GzReal key, GzVector& val) {
 	GzReal k = (key - key1) / (key2 - key1);
 	for (GzInt i = 0; i < 3; i++)
@@ -353,7 +352,7 @@ void GzFrameBuffer::vectorInterpolate(GzReal key1, GzVector& val1, GzReal key2, 
 	val.normalize();
 }
 void GzFrameBuffer::drawRasLine(GzInt y, GzReal xMin, GzReal zMin, GzColor& cMin, GzVector& nMin, GzReal xMax, GzReal zMax, GzColor& cMax, GzVector& nMax, GzFunctional status) {
-	
+
 	if ((y < 0) || (y >= image.sizeH())) return;
 	if ((GzInt)floor(xMin) == (GzInt)floor(xMax)) {
 		if (zMin > zMax) drawPoint(GzVertex(floor(xMin), y, zMin), cMin, nMin, status);
