@@ -7,10 +7,10 @@ UH ID: 2000065
 Microsoft Visual Studio 2019 
 
 ## Require package
-*Python
-*OpenCV
-*Numpy
-*PIL
+* Python
+* OpenCV
+* Numpy
+* PIL
 
 ## Compiling method
 1. Clone the repo into your local machine or download a zip file of the entire project.
