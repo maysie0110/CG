@@ -2,8 +2,6 @@
 
 import numpy as np
 import cv2
-import scipy.interpolate
-from scipy.interpolate import make_interp_spline, BSpline, CubicSpline, UnivariateSpline,interp1d
 import matplotlib.pyplot as plt
 from PIL import Image
 import math
@@ -25,6 +23,11 @@ y1_values = []
 
 x2_values = []
 y2_values = []
+
+# Reference: https://www.thepythoncode.com/article/canny-edge-detection-opencv-python
+# # https://docs.opencv.org/master/d4/d73/tutorial_py_contours_begin.html
+# # https://stackoverflow.com/questions/34884779/whats-a-simple-way-of-warping-an-image-with-a-given-set-of-points
+# # https://www.owlnet.rice.edu/~elec539/Projects97/morphjrks/warp.html
 
 # function to interact with application to select the points clicked on the image 
 def click_event(event, x, y, flags, params):
@@ -81,7 +84,7 @@ def click_event(event, x, y, flags, params):
             p = np.array(p)
             q = np.array(q)
             k = len(p)
-            ###splineCurve(p)
+
             drawCurve(p,q)
             points = []
             for i in range(count1):
@@ -91,51 +94,10 @@ def click_event(event, x, y, flags, params):
             count1 = 0
             count2 = 0
 
-            #apply warping function to the user-specified feature curve
-            warp(points)
+            #apply warping function to hte image using the user-specified feature curve
+            warpImage(points)
 
-#def splineCurve(x,y):
-def splineCurve(points):
-    ##print(points)
-    ##points = np.array(points)
-
-    print(points)
-    ind=np.argsort(points[:,0])
-    a = points[ind]
-    print(ind)
-    print(a)
-    x = a[:,0]
-    y = a[:,1]
-    ## calculate natural cubic spline polynomials
-    #cs = CubicSpline(x,y,bc_type='natural')
-    ##f = interp1d(x, y)
-    ##f2 = interp1d(x, y, kind='cubic')
-   
-
-    ## show values of interpolation function at x=1.25
-    ##print('S(1.25) = ', cs(1.25))
-    ###x_new = np.linspace(0, 2, 100)
-    #x_new = np.linspace(min(x),max(x),100)
-    #y_new = cs(x_new)
-
-    ## get x and y vectors
-    #x = points[:,0]
-    #y = points[:,1]
-
-    ## calculate polynomial
-    #z = np.polyfit(x, y, 3)
-    #f = np.poly1d(z)
-
-    ## calculate new x's and y's
-    #x_new = np.linspace(x[0], x[-1], 50)
-    #y_new = f(x_new)
-
-    s = UnivariateSpline(x, y, s=0)
-    x_new = np.linspace(min(x),max(x),100)
-    y_new = s(x_new)
-    drawCurve(x_new,y_new)
-
-# draw curve from user-input points
+# create curve from user-input points
 def drawCurve(p,q):
     x1_values = p[:,0]
     y1_values = p[:,1]
@@ -155,17 +117,17 @@ def drawCurve(p,q):
     cv2.imwrite(contour_file,imageCurve)
 
     
-def vector_length(vector):
+def _length(vector):
   return math.sqrt(vector[0] ** 2 + vector[1] ** 2)
 
-def points_distance(point1, point2):
-  return vector_length((point1[0] - point2[0],point1[1] - point2[1]))
+def _distance(point1, point2):
+  return _length((point1[0] - point2[0],point1[1] - point2[1]))
 
-def clamp(value, minimum, maximum):
+def getCoords(value, minimum, maximum):
   return max(min(value,maximum),minimum)
 
-# warping function
-def warp(points):
+# Image warping function
+def warpImage(points):
   image = Image.open(image_file)
   result = img = Image.new("RGB",image.size,"black")
 
@@ -184,12 +146,12 @@ def warp(points):
         direction = point[3]-point[1] #Dy
         shift_vector = (distance,direction)
 
-        helper = 1.0 / (3 * (points_distance((x,y),point_position) / vector_length(shift_vector)) ** 4 + 5)
+        #determing the amount of movement for neighboring pixel depend on the distance to the control point
+        weight = 1.0 / (3 * (_distance((x,y),point_position) / _length(shift_vector)) ** 4 + 5)
+        offset[0] -= weight * shift_vector[0]
+        offset[1] -= weight * shift_vector[1]
 
-        offset[0] -= helper * shift_vector[0]
-        offset[1] -= helper * shift_vector[1]
-
-      coords = (clamp(x + int(offset[0]),0,image.size[0] - 1),clamp(y + int(offset[1]),0,image.size[1] - 1))
+      coords = (getCoords(x + int(offset[0]),0,image.size[0] - 1),getCoords(y + int(offset[1]),0,image.size[1] - 1))
 
       result_pixels[x,y] = image_pixels[coords[0],coords[1]]
 
